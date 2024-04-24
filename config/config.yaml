@@ -1,0 +1,36 @@
+name: "planar_quadrotor"
+
+pred_horizon: 48
+obs_horizon: 16
+action_horizon: 16
+
+controller:
+    networks:
+        obs_dim: 6
+        action_dim: 6
+        obstacle_encode_dim: 49
+    noise_scheduler:
+        type: "ddpm"
+        num_train_timesteps: 100  # number of diffusion iterations
+        beta_schedule: "squaredcos_cap_v2"
+        clip_sample: true  # required when predict_epsilon=False
+        prediction_type: "epsilon"  # or sample
+
+dataloader:
+    batch_size: 256
+
+normalizer:
+    action:
+        min: [-0.57460983, -2.90234399, -1.44731583, -6.79609778, -0.78425646, -8.73352385]
+        max: [ 8.03662287,  6.14947895,  6.04555597, 10.62913491,  0.61885451, 10.58519411]
+    observation:
+        min: [-0.57398075, -2.90088606, -1.44594598, -6.93829823, -0.771029  , -8.94696617]
+        max: [ 8.03639698,  6.11731672,  6.04495668, 10.44115734,  0.61384332, 10.15015793]
+
+simulator:
+    m_q: 1.0 # kg
+    I_xx: 0.1 # kg.m^2
+    l_q: 0.3 # m, length of the quadrotor
+    g: 9.81
+    dt: 0.01
+
