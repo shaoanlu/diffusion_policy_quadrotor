@@ -1,6 +1,5 @@
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 from typing import Union
 
 from core.networks.conv1d_components import Downsample1d, Upsample1d, Conv1dBlock
