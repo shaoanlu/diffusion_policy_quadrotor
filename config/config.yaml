@@ -11,11 +11,16 @@ controller:
         obstacle_encode_dim: 49
     noise_scheduler:
         type: "ddpm"
-        num_train_timesteps: 100  # number of diffusion iterations
-        beta_schedule: "squaredcos_cap_v2"
-        clip_sample: true  # required when predict_epsilon=False
-        prediction_type: "epsilon"  # or sample
-
+        ddpm:
+            num_train_timesteps: 100  # number of diffusion iterations
+            beta_schedule: "squaredcos_cap_v2"
+            clip_sample: true  # required when predict_epsilon=False
+            prediction_type: "epsilon"
+        dpmsolver:  # faster inference
+            num_train_timesteps: 100
+            beta_schedule: "squaredcos_cap_v2"
+            prediction_type: "epsilon"
+            use_karras_sigmas: true
 dataloader:
     batch_size: 256
 

@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from typing import Dict, List
 from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
+from diffusers.schedulers.scheduling_dpmsolver_multistep import DPMSolverMultistepScheduler
 
 from core.controllers.base_controller import BaseController
 from core.networks.conditional_unet1d import ConditionalUnet1D
@@ -22,10 +23,17 @@ def build_noise_scheduler_from_config(config: Dict):
     type_noise_scheduler = config["controller"]["noise_scheduler"]["type"]
     if type_noise_scheduler.lower() == "ddpm":
         return DDPMScheduler(
-            num_train_timesteps=config["controller"]["noise_scheduler"]["num_train_timesteps"],
-            beta_schedule=config["controller"]["noise_scheduler"]["beta_schedule"],
-            clip_sample=config["controller"]["noise_scheduler"]["clip_sample"],
-            prediction_type=config["controller"]["noise_scheduler"]["prediction_type"],
+            num_train_timesteps=config["controller"]["noise_scheduler"]["ddpm"]["num_train_timesteps"],
+            beta_schedule=config["controller"]["noise_scheduler"]["ddpm"]["beta_schedule"],
+            clip_sample=config["controller"]["noise_scheduler"]["ddpm"]["clip_sample"],
+            prediction_type=config["controller"]["noise_scheduler"]["ddpm"]["prediction_type"],
+        )
+    elif type_noise_scheduler.lower() == "dpmsolver":
+        return DPMSolverMultistepScheduler(
+            num_train_timesteps=config["controller"]["noise_scheduler"]["dpmsolver"]["num_train_timesteps"],
+            beta_schedule=config["controller"]["noise_scheduler"]["dpmsolver"]["beta_schedule"],
+            prediction_type=config["controller"]["noise_scheduler"]["dpmsolver"]["prediction_type"],
+            use_karras_sigmas=config["controller"]["noise_scheduler"]["dpmsolver"]["use_karras_sigmas"]
         )
     else:
         raise NotImplementedError
@@ -105,8 +113,8 @@ class QuadrotorDiffusionPolicy:
         dt, m_q,  = self.quadrotor_params["dt"], self.quadrotor_params["m_q"]
         g, I_xx = self.quadrotor_params["g"], self.quadrotor_params["I_xx"]
         # how on earth do you want to calculate acceleration from position signals
-        est_zr_dot = (zr - z) / dt
-        est_phir_dot = (phir - phi) / dt
-        zr_ddot = (est_zr_dot - z_dot) / dt  # (zr_dot - z_dot) / dt
-        phir_ddot = (est_phir_dot - phi_dot) / dt  # (phir_dot - phi_dot) / dt
+        # est_zr_dot = (zr - z) / dt
+        # est_phir_dot = (phir - phi) / dt
+        zr_ddot = (zr_dot - z_dot) / dt
+        phir_ddot = (phir_dot - phi_dot) / dt
         return np.array([m_q * (g + zr_ddot), I_xx * phir_ddot])
