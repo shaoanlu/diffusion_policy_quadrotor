@@ -1,11 +1,13 @@
+from typing import Dict, List
+
 import numpy as np
 import torch
-from typing import Dict, List
-from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
-from diffusers.schedulers.scheduling_dpmsolver_multistep import DPMSolverMultistepScheduler
 from diffusers.schedulers.scheduling_ddim import DDIMScheduler
+from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
+from diffusers.schedulers.scheduling_dpmsolver_multistep import (
+    DPMSolverMultistepScheduler,
+)
 
-from core.controllers.base_controller import BaseController
 from core.networks.conditional_unet1d import ConditionalUnet1D
 from utils.normalizers import BaseNormalizer
 
@@ -15,10 +17,8 @@ def build_networks_from_config(config: Dict):
     obs_dim = config["controller"]["networks"]["obs_dim"]
     obs_horizon = config["obs_horizon"]
     obstacle_encode_dim = config["controller"]["networks"]["obstacle_encode_dim"]
-    return ConditionalUnet1D(
-        input_dim=action_dim,
-        global_cond_dim=obs_dim*obs_horizon + obstacle_encode_dim
-    )
+    return ConditionalUnet1D(input_dim=action_dim, global_cond_dim=obs_dim * obs_horizon + obstacle_encode_dim)
+
 
 def build_noise_scheduler_from_config(config: Dict):
     type_noise_scheduler = config["controller"]["noise_scheduler"]["type"]
@@ -41,14 +41,21 @@ def build_noise_scheduler_from_config(config: Dict):
             num_train_timesteps=config["controller"]["noise_scheduler"]["dpmsolver"]["num_train_timesteps"],
             beta_schedule=config["controller"]["noise_scheduler"]["dpmsolver"]["beta_schedule"],
             prediction_type=config["controller"]["noise_scheduler"]["dpmsolver"]["prediction_type"],
-            use_karras_sigmas=config["controller"]["noise_scheduler"]["dpmsolver"]["use_karras_sigmas"]
+            use_karras_sigmas=config["controller"]["noise_scheduler"]["dpmsolver"]["use_karras_sigmas"],
         )
     else:
         raise NotImplementedError
 
 
-class QuadrotorDiffusionPolicy:  
-    def __init__(self, model: ConditionalUnet1D, noise_scheduler: DDPMScheduler, normalizer: BaseNormalizer, config: Dict, device: str="cuda"):
+class QuadrotorDiffusionPolicy:
+    def __init__(
+        self,
+        model: ConditionalUnet1D,
+        noise_scheduler: DDPMScheduler,
+        normalizer: BaseNormalizer,
+        config: Dict,
+        device: str = "cuda",
+    ):
         self.device = device
         self.net = model
         self.noise_scheduler = noise_scheduler
@@ -88,7 +95,7 @@ class QuadrotorDiffusionPolicy:
                 naction = self.noise_scheduler.step(model_output=noise_pred, timestep=k, sample=naction).prev_sample
 
         # unnormalize action
-        naction = naction.detach().to('cpu').numpy()
+        naction = naction.detach().to("cpu").numpy()
         # (1, pred_horizon, action_dim)
         naction = naction[0]
         action_pred = self.normalizer.unnormalize_data(naction, stats=self.norm_stats["act"])
@@ -96,7 +103,7 @@ class QuadrotorDiffusionPolicy:
         # only take action_horizon number of actions
         start = self.obs_horizon - 1
         end = start + self.action_horizon
-        action = action_pred[start:end,:]  # (action_horizon, action_dim)
+        action = action_pred[start:end, :]  # (action_horizon, action_dim)
 
         return action
 
@@ -108,7 +115,7 @@ class QuadrotorDiffusionPolicy:
         self.obs_horizon = config["obs_horizon"]
         self.action_horizon = config["action_horizon"]
         self.pred_horizon = config["pred_horizon"]
-        self.action_dim =  config["controller"]["networks"]["action_dim"]
+        self.action_dim = config["controller"]["networks"]["action_dim"]
         self.norm_stats = {
             "act": config["normalizer"]["action"],
             "obs": config["normalizer"]["observation"],
@@ -118,7 +125,10 @@ class QuadrotorDiffusionPolicy:
     def calculate_force_command(self, state: np.ndarray, ref_state: np.ndarray) -> np.ndarray:
         y, y_dot, z, z_dot, phi, phi_dot = state
         yr, yr_dot, zr, zr_dot, phir, phir_dot = ref_state
-        dt, m_q,  = self.quadrotor_params["dt"], self.quadrotor_params["m_q"]
+        (
+            dt,
+            m_q,
+        ) = self.quadrotor_params["dt"], self.quadrotor_params["m_q"]
         g, I_xx = self.quadrotor_params["g"], self.quadrotor_params["I_xx"]
         # how on earth do you want to calculate acceleration from position signals
         # est_zr_dot = (zr - z) / dt

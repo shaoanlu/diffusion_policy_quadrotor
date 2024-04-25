@@ -1,3 +1,4 @@
 
 *.pyc
 tmp_imgs/*.*
+*checkpoint.py

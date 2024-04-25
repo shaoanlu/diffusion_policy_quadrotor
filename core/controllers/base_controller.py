@@ -2,7 +2,7 @@ import numpy as np
 from typing import Dict, List
 
 
-class BaseController:  
+class BaseController:
     def __init__(self, device: str = "cuda"):
         self.device = device
 
