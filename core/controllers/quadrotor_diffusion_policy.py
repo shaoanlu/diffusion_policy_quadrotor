@@ -3,6 +3,7 @@ import torch
 from typing import Dict, List
 from diffusers.schedulers.scheduling_ddpm import DDPMScheduler
 from diffusers.schedulers.scheduling_dpmsolver_multistep import DPMSolverMultistepScheduler
+from diffusers.schedulers.scheduling_ddim import DDIMScheduler
 
 from core.controllers.base_controller import BaseController
 from core.networks.conditional_unet1d import ConditionalUnet1D
@@ -27,6 +28,13 @@ def build_noise_scheduler_from_config(config: Dict):
             beta_schedule=config["controller"]["noise_scheduler"]["ddpm"]["beta_schedule"],
             clip_sample=config["controller"]["noise_scheduler"]["ddpm"]["clip_sample"],
             prediction_type=config["controller"]["noise_scheduler"]["ddpm"]["prediction_type"],
+        )
+    elif type_noise_scheduler.lower() == "ddim":
+        return DDIMScheduler(
+            num_train_timesteps=config["controller"]["noise_scheduler"]["ddim"]["num_train_timesteps"],
+            beta_schedule=config["controller"]["noise_scheduler"]["ddim"]["beta_schedule"],
+            clip_sample=config["controller"]["noise_scheduler"]["ddim"]["clip_sample"],
+            prediction_type=config["controller"]["noise_scheduler"]["ddim"]["prediction_type"],
         )
     elif type_noise_scheduler.lower() == "dpmsolver":
         return DPMSolverMultistepScheduler(

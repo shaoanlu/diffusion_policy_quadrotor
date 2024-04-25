@@ -16,7 +16,12 @@ controller:
             beta_schedule: "squaredcos_cap_v2"
             clip_sample: true  # required when predict_epsilon=False
             prediction_type: "epsilon"
-        dpmsolver:  # faster inference
+        ddim:  # faster inference
+            num_train_timesteps: 100
+            beta_schedule: "squaredcos_cap_v2"
+            clip_sample: true
+            prediction_type: "epsilon"
+        dpmsolver:  # faster inference, experimental
             num_train_timesteps: 100
             beta_schedule: "squaredcos_cap_v2"
             prediction_type: "epsilon"
