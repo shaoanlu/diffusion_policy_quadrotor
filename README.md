@@ -3,4 +3,4 @@ This repository provides a demonstration of imitation learning using a diffusion
 
 ## Result
 ![](assets/result_anim.gif)
-
+![](assets/result_plot.png)
