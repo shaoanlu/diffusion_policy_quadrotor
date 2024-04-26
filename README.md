@@ -22,3 +22,5 @@ The program was developed and tested in the following environment.
 The policy takes 1) the latest N step of observation (position and velocity) and 2) encoding of obstacle information (7x7 grid with obstacle radius as values) as input and outputs N steps of actions (future position and future velocity).
 
 <img src="assets/model_input.jpg" alt="drawing" width="480"/>
+
+*The quadrotor icon is from [flaticon](https://www.flaticon.com/free-icon/quadcopter_5447794).
