@@ -21,7 +21,9 @@ class ConditionalResidualBlock1D(nn.Module):
         # predicts per-channel scale and bias
         cond_channels = out_channels * 2
         self.out_channels = out_channels
-        self.cond_encoder = nn.Sequential(nn.Mish(), nn.Linear(cond_dim, cond_channels), nn.Unflatten(-1, (-1, 1)))
+        self.cond_encoder = nn.Sequential(
+            nn.Linear(cond_dim, cond_dim), nn.Mish(), nn.Linear(cond_dim, cond_channels), nn.Unflatten(-1, (-1, 1))
+        )
 
         # make sure dimensions compatible
         self.residual_conv = nn.Conv1d(in_channels, out_channels, 1) if in_channels != out_channels else nn.Identity()

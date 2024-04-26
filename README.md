@@ -7,6 +7,9 @@ The control task is to drive the quadrotor from the initial position (0, 0) to t
 <img src="assets/result_anim.gif" alt="drawing" width="380"/> <img src="assets/result_plot.png" alt="drawing" width="370"/>
 
 
+## Usage
+The notebook `demo.ipynb` demonstrates a closed-loop simulation using the diffusion policy controller for quadrotor collision avoidance.
+
 ## Dependencies
 The program was developed and tested in the following environment.
 - Python 3.10
@@ -24,3 +27,8 @@ The policy takes 1) the latest N step of observation (position and velocity) and
 <img src="assets/model_input.jpg" alt="drawing" width="480"/>
 
 *The quadrotor icon is from [flaticon](https://www.flaticon.com/free-icon/quadcopter_5447794).
+
+
+## Deviation from the original implementation
+- Add a linear layer before the Mish activation to the condition encoder of `ConditionalResidualBlock1D`. This is to prevent the activation from truncating negative values from the raw observation.
+
