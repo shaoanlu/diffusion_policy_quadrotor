@@ -8,7 +8,7 @@ The control task is to drive the quadrotor from the initial position (0, 0) to t
 
 
 ## Usage
-The notebook `demo.ipynb` demonstrates a closed-loop simulation using the diffusion policy controller for quadrotor collision avoidance.
+The notebook `demo.ipynb` demonstrates a closed-loop simulation using the diffusion policy controller for quadrotor collision avoidance. We provide colab notebook as well [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/shaoanlu/diffusion_policy_quadrotor/blob/main/demo.ipynb) (GPU instance is recommended).
 
 ## Dependencies
 The program was developed and tested in the following environment.
