@@ -26,6 +26,18 @@ controller:
             beta_schedule: "squaredcos_cap_v2"
             prediction_type: "epsilon"
             use_karras_sigmas: true
+
+trainer:
+    use_ema: true
+    batch_size: 256
+    optimizer:
+        name: "adamw"
+        learning_rate: 1.0e-4
+        weight_decay: 1.0e-6
+    lr_scheduler:
+        name: "cosine"
+        num_warmup_steps: 500
+
 dataloader:
     batch_size: 256
 
