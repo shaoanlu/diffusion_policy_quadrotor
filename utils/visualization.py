@@ -40,5 +40,7 @@ def visualize_quadrotor_simulation_result(
     plt.scatter(init_x, init_y, s=200, color="green", alpha=0.75, label="init. position")
     plt.scatter(5.0, 5.0, s=200, color="purple", alpha=0.75, label="target position")
 
+    plt.xlim(-0.5, 7)
+    plt.ylim(-0.5, 7)
     plt.grid()
     plt.show()
