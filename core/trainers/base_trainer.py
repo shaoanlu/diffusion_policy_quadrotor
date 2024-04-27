@@ -8,9 +8,7 @@ class BaseDiffusionPolicyTrainer:
         pass
 
     @abstractmethod
-    def run(
-        self,
-    ):
+    def train(self, *args, **kwargs):
         raise NotImplementedError
 
     @abstractmethod
