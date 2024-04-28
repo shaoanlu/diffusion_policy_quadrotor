@@ -20,21 +20,11 @@ class TestPlanarQuadrotorStateDataset(unittest.TestCase):
         self.obstacle_encode_dim = self.config["controller"]["networks"]["obstacle_encode_dim"]
 
     def test_init(self):
-        dataset = PlanarQuadrotorStateDataset(
-            dataset_path=self.dataset_path,
-            pred_horizon=self.pred_horizon,
-            obs_horizon=self.obs_horizon,
-            action_horizon=self.action_horizon,
-        )
+        dataset = PlanarQuadrotorStateDataset(dataset_path=self.dataset_path, config=self.config)
         self.assertTrue(isinstance(dataset, PlanarQuadrotorStateDataset))
 
     def test_iter(self):
-        dataset = PlanarQuadrotorStateDataset(
-            dataset_path=self.dataset_path,
-            pred_horizon=self.pred_horizon,
-            obs_horizon=self.obs_horizon,
-            action_horizon=self.action_horizon,
-        )
+        dataset = PlanarQuadrotorStateDataset(dataset_path=self.dataset_path, config=self.config)
         dataloader = torch.utils.data.DataLoader(
             dataset,
             batch_size=self.config["dataloader"]["batch_size"],

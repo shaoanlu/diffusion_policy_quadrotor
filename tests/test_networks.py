@@ -40,7 +40,7 @@ class TestConditionalUnet1D(unittest.TestCase):
         # removing noise
         denoised_action = noised_action - noise
 
-        self.assertEqual(denoised_action.shape, (self.action_horizon, self.action_dim))
+        self.assertEqual(denoised_action.shape, (1, self.pred_horizon, self.action_dim))
 
 
 if __name__ == "__main__":
