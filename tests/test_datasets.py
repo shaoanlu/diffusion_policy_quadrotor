@@ -7,7 +7,7 @@ from core.dataset.quadrotor_dataset import PlanarQuadrotorStateDataset
 
 class TestPlanarQuadrotorStateDataset(unittest.TestCase):
     def setUp(self):
-        self.dataset_path = "tests/test_dataset.joblib"
+        self.dataset_path = "tests/fixtures/test_dataset.joblib"
 
         with open("tests/config/test_config.yaml", "r") as file:
             self.config = yaml.safe_load(file)
