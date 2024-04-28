@@ -1,0 +1,57 @@
+name: "planar_quadrotor"
+
+pred_horizon: 96
+obs_horizon: 2
+action_horizon: 10
+
+controller:
+    networks:
+        obs_dim: 6
+        action_dim: 6
+        obstacle_encode_dim: 49
+    noise_scheduler:
+        type: "ddpm"
+        ddpm:
+            num_train_timesteps: 100  # number of diffusion iterations
+            beta_schedule: "squaredcos_cap_v2"
+            clip_sample: true  # required when predict_epsilon=False
+            prediction_type: "epsilon"
+        ddim:  # faster inference
+            num_train_timesteps: 100
+            beta_schedule: "squaredcos_cap_v2"
+            clip_sample: true
+            prediction_type: "epsilon"
+        dpmsolver:  # faster inference, experimental
+            num_train_timesteps: 100
+            beta_schedule: "squaredcos_cap_v2"
+            prediction_type: "epsilon"
+            use_karras_sigmas: true
+
+trainer:
+    use_ema: true
+    batch_size: 8
+    optimizer:
+        name: "adamw"
+        learning_rate: 1.0e-4
+        weight_decay: 1.0e-6
+    lr_scheduler:
+        name: "cosine"
+        num_warmup_steps: 500
+
+dataloader:
+    batch_size: 8
+
+normalizer:
+    action:
+        min: [-2.6515920785069467, -10.169477462768555, -4.270973491668701, -13.883374419993748, -1.9637073183059692, -20.395111083984375]
+        max: [8.0543811917305, 6.976394176483154, 8.477932775914669, 11.327190831233095, 2.5276688146591186, 18.05487823486328]
+    observation:
+        min: [-2.649836301803589, -9.564324378967285, -4.264063358306885, -13.772777557373047, -1.9476231336593628, -17.225351333618164]
+        max: [8.05234146118164, 6.976299285888672, 8.474746704101562, 10.96181583404541, 2.5151419639587402, 18.054880142211914]
+
+simulator:
+    m_q: 1.0 # kg
+    I_xx: 0.1 # kg.m^2
+    l_q: 0.3 # m, length of the quadrotor
+    g: 9.81
+    dt: 0.01
