@@ -39,7 +39,7 @@ trainer:
         num_warmup_steps: 500
 
 dataloader:
-    batch_size: 8
+    batch_size: 3
 
 normalizer:
     action:

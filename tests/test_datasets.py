@@ -24,10 +24,11 @@ class TestPlanarQuadrotorStateDataset(unittest.TestCase):
         self.assertTrue(isinstance(dataset, PlanarQuadrotorStateDataset))
 
     def test_iter(self):
+        batch_size = self.config["dataloader"]["batch_size"]
         dataset = PlanarQuadrotorStateDataset(dataset_path=self.dataset_path, config=self.config)
         dataloader = torch.utils.data.DataLoader(
             dataset,
-            batch_size=self.config["dataloader"]["batch_size"],
+            batch_size=batch_size,
             shuffle=True,
             pin_memory=True,
         )
@@ -35,9 +36,9 @@ class TestPlanarQuadrotorStateDataset(unittest.TestCase):
         # batch context matches expectecd shapes
         batch = next(iter(dataloader))
         self.assertEqual(
-            batch["obs"].shape, (self.batch_size, self.obs_dim * self.obs_horizon + self.obstacle_encode_dim)
+            batch["obs"].shape, (batch_size, self.obs_dim * self.obs_horizon + self.obstacle_encode_dim)
         )
-        self.assertEqual(batch["action"].shape, (self.batch_size, self.pred_horizon, self.action_dim))
+        self.assertEqual(batch["action"].shape, (batch_size, self.pred_horizon, self.action_dim))
 
 
 if __name__ == "__main__":
