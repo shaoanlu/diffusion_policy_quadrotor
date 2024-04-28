@@ -15,7 +15,7 @@ The training script is provided as `train.ipynb`.
 ## Dependencies
 The program was developed and tested in the following environment.
 - Python 3.10
-- `torch==0.13.1`
+- `torch==1.13.1`
 - `jax==0.4.23`
 - `jaxlib==0.4.23`
 - `diffusers==0.18.2`

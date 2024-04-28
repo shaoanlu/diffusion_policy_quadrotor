@@ -7,7 +7,6 @@ from core.networks.conditional_unet1d import ConditionalUnet1D
 
 class TestConditionalUnet1D(unittest.TestCase):
     def setUp(self):
-
         with open("tests/config/test_config.yaml", "r") as file:
             self.config = yaml.safe_load(file)
 
@@ -20,20 +19,18 @@ class TestConditionalUnet1D(unittest.TestCase):
 
     def test_init(self):
         noise_pred_net = ConditionalUnet1D(
-            input_dim=self.action_dim,
-            global_cond_dim=self.obs_dim*self.obs_horizon + self.obstacle_encode_dim
+            input_dim=self.action_dim, global_cond_dim=self.obs_dim * self.obs_horizon + self.obstacle_encode_dim
         )
         self.assertTrue(isinstance(noise_pred_net, ConditionalUnet1D))
 
     def test_inference(self):
         net = ConditionalUnet1D(
-            input_dim=self.action_dim,
-            global_cond_dim=self.obs_dim*self.obs_horizon + self.obstacle_encode_dim
+            input_dim=self.action_dim, global_cond_dim=self.obs_dim * self.obs_horizon + self.obstacle_encode_dim
         )
 
         # example inputs
         noised_action = torch.randn((1, self.pred_horizon, self.action_dim))
-        obs = torch.zeros((1, self.obs_horizon*self.obs_dim+self.obstacle_encode_dim))
+        obs = torch.zeros((1, self.obs_horizon * self.obs_dim + self.obstacle_encode_dim))
         diffusion_iter = torch.zeros((1,))
 
         # the noise prediction network
