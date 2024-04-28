@@ -50,6 +50,47 @@ class PlanarQuadrotorDiffusionPolicyTrainer(BaseDiffusionPolicyTrainer):
         self.use_ema = config["trainer"]["use_ema"]
         self.ema = EMAModel(parameters=self.net.parameters(), power=0.75) if self.use_ema else None
 
+    def prepare_inputs(self, batch):
+        # data normalized in dataset
+        # device transfer
+        obs_cond = batch["obs"].to(self.device, dtype=torch.float32)  # FiLM conditioning
+        action = batch["action"].to(self.device, dtype=torch.float32)
+        batch_size = obs_cond.shape[0]
+        return obs_cond, action, batch_size
+
+    def optimization_step(self, action, obs_cond, batch_size):
+        # sample noise to add to actions
+        noise = torch.randn(action.shape, device=self.device)
+
+        # sample a diffusion iteration for each data point
+        timesteps = torch.randint(
+            0, self.noise_scheduler.config.num_train_timesteps, (batch_size,), device=self.device
+        ).long()
+
+        # add noise to the clean images according to the noise magnitude at each diffusion iteration
+        # (this is the forward diffusion process)
+        noisy_actions = self.noise_scheduler.add_noise(action, noise, timesteps)
+
+        # predict the noise residual
+        noise_pred = self.net(noisy_actions, timesteps, global_cond=obs_cond)
+
+        # L2 loss
+        loss = nn.functional.mse_loss(noise_pred, noise)
+
+        # optimize
+        loss.backward()
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+        # step lr scheduler every batch
+        # this is different from standard pytorch behavior
+        self.lr_scheduler.step()
+
+        # update Exponential Moving Average of the model weights
+        if self.use_ema:
+            self.ema.step(self.net.parameters())
+
+        return loss
+
     def train(self, num_epochs: int, save_ckpt_epoch: int = None):
         if save_ckpt_epoch is None:
             save_ckpt_epoch = num_epochs
@@ -71,50 +112,14 @@ class PlanarQuadrotorDiffusionPolicyTrainer(BaseDiffusionPolicyTrainer):
                 # batch loop
                 with tqdm(self.dataloader, desc="Batch", leave=False) as tepoch:
                     for nbatch in tepoch:
-                        # data normalized in dataset
-                        # device transfer
-                        nobs = nbatch["obs"].to(self.device, dtype=torch.float32)
-                        naction = nbatch["action"].to(self.device, dtype=torch.float32)
-                        B = nobs.shape[0]
-
-                        # observation as FiLM conditioning
-                        # (B, obs_horizon*obs_dim+obstacle_encode_dim)
-                        obs_cond = nobs[:, ...]
-
-                        # sample noise to add to actions
-                        noise = torch.randn(naction.shape, device=self.device)
-
-                        # sample a diffusion iteration for each data point
-                        timesteps = torch.randint(
-                            0, self.noise_scheduler.config.num_train_timesteps, (B,), device=self.device
-                        ).long()
-
-                        # add noise to the clean images according to the noise magnitude at each diffusion iteration
-                        # (this is the forward diffusion process)
-                        noisy_actions = self.noise_scheduler.add_noise(naction, noise, timesteps)
-
-                        # predict the noise residual
-                        noise_pred = self.net(noisy_actions, timesteps, global_cond=obs_cond)
-
-                        # L2 loss
-                        loss = nn.functional.mse_loss(noise_pred, noise)
-
-                        # optimize
-                        loss.backward()
-                        self.optimizer.step()
-                        self.optimizer.zero_grad()
-                        # step lr scheduler every batch
-                        # this is different from standard pytorch behavior
-                        self.lr_scheduler.step()
-
-                        # update Exponential Moving Average of the model weights
-                        if self.use_ema:
-                            self.ema.step(self.net.parameters())
+                        obs_cond, action, B = self.prepare_inputs(nbatch)
+                        loss = self.optimization_step(action, obs_cond, B)
 
                         # logging
                         loss_cpu = loss.item()
                         epoch_loss.append(loss_cpu)
                         tepoch.set_postfix(loss=loss_cpu)
+
                 tglobal.set_postfix(loss=np.mean(epoch_loss))
                 trn_loss.append(np.mean(epoch_loss))
 
