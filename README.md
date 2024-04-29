@@ -15,10 +15,10 @@ The training script is provided as `train.ipynb`.
 ## Dependencies
 The program was developed and tested in the following environment.
 - Python 3.10
-- `torch==1.13.1`
-- `jax==0.4.23`
-- `jaxlib==0.4.23`
-- `diffusers==0.18.2`
+- `torch==2.2.1`
+- `jax==0.4.26`
+- `jaxlib==0.4.26`
+- `diffusers==0.27.2`
 - `torchvision==0.14.1`
 - `gdown` (to download pre-trained weights)
 - `joblib` (format of training data)
