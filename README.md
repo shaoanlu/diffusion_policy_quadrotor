@@ -37,11 +37,11 @@ The policy takes 1) the latest N step of observation $o_t$ (position and velocit
 
 ## References
 Papers
-- [Diffusion Policy: Visuomotor Policy Learning via Action Diffusion](https://diffusion-policy.cs.columbia.edu/)
-- [3D Diffusion Policy: Generalizable Visuomotor Policy Learning via Simple 3D Representations](https://3d-diffusion-policy.github.io/)
+- [Diffusion Policy: Visuomotor Policy Learning via Action Diffusion](https://diffusion-policy.cs.columbia.edu/) [arXiv:2303.04137]
+- [3D Diffusion Policy: Generalizable Visuomotor Policy Learning via Simple 3D Representations](https://3d-diffusion-policy.github.io/) [arXiv:2403.03954]
 
 Videos and Lectures
-- [How Diffusion Models Work](https://www.deeplearning.ai/short-courses/how-diffusion-models-work/)
+- [DeepLearning.AI: How Diffusion Models Work](https://www.deeplearning.ai/short-courses/how-diffusion-models-work/)
 - [[论文速览]Diffusion Policy: Visuomotor Policy Learning via Action Diff.[2303.04137]](https://www.bilibili.com/video/BV1Cu411Y7d7)
 - [[論文導讀]Planning with Diffusion for Flexible Behavior Synthesis解說 (含程式碼)](https://youtu.be/ciCcvWutle4)
 - [6.4210 Fall 2023 Lecture 18: Visuomotor Policies (via Behavior Cloning)](https://youtu.be/i-303tTtEig)
