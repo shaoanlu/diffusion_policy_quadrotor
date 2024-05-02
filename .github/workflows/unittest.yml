@@ -1,6 +1,6 @@
 name: Python Unit Tests
 
-# Defines when the action should run. This example triggers on push and pull requests to the main branch.
+# Defines when the action should run. This workflow triggers on push and pull requests to the main branch.
 on:
   push:
     branches: [ main ]
@@ -27,7 +27,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
 
-    # Install dependencies (if any)
+    # Install dependencies
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
