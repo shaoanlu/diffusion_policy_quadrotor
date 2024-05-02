@@ -30,6 +30,9 @@ class PlanarQuadrotorEnv:
     def step(self, state=None, control=[0, 0], dt: float = 0.01):
         """
         dynamics with JAX-compatible code.
+
+        Equations are from the Aerial Robotics coursera lecture
+        https://www.coursera.org/lecture/robotics-flight/2-d-quadrotor-control-kakc6
         """
         if state is None:
             state = self.state
