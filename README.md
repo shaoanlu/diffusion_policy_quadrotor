@@ -24,9 +24,9 @@ The program was developed and tested in the following environment.
 - `joblib` (format of training data)
 
 ## Diffusion policy
-The policy takes 1) the latest N step of observation $o_t$ (position and velocity) and 2) the encoding of obstacle information $O_{BST}$ (7x7 grid with obstacle radius as values) as input and outputs N steps of actions $a_t$ (future position and future velocity).
+The policy takes 1) the latest N step of observation $o_t$ (position and velocity) and 2) the encoding of obstacle information $O_{BST}$ (a flattened 7x7 grid with obstacle radius as values) as input. The outputs are N steps of actions $a_t$ (future position and future velocity).
 
-<img src="assets/model_input.jpg" alt="drawing" width="480"/>
+<img src="assets/model_input.jpg" alt="drawing" width="400"/>
 
 *The quadrotor icon is from [flaticon](https://www.flaticon.com/free-icon/quadcopter_5447794).
 
