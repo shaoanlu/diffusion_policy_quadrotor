@@ -47,5 +47,13 @@ Videos and Lectures
 - [6.4210 Fall 2023 Lecture 18: Visuomotor Policies (via Behavior Cloning)](https://youtu.be/i-303tTtEig)
 
 ## Learning note
-Refer to [`learning_note.md`](learning_note.md).
+### Failure case: the diffusion policy controller failed to extrapolate from training data
+Figure: A failure case of the controller.
+- The left figure is a trajectory in the training data.
+- The middle figure is the closed-loop simulation result of the controller starting from the SAME initial position as the training data.
+- The right figure is the closed-loop simulation result of the controller starting from a DIFFERENT initial position, which resulted in a trajectory with collision.
+
+<img src="assets/dp_sensitive_to_init_pos.jpg" alt="drawing" width="600"/>
+
+Refer to [`learning_note.md`](learning_note.md) for other notes.
 
