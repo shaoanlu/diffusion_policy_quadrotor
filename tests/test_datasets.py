@@ -35,9 +35,7 @@ class TestPlanarQuadrotorStateDataset(unittest.TestCase):
 
         # batch context matches expectecd shapes
         batch = next(iter(dataloader))
-        self.assertEqual(
-            batch["obs"].shape, (batch_size, self.obs_dim * self.obs_horizon + self.obstacle_encode_dim)
-        )
+        self.assertEqual(batch["obs"].shape, (batch_size, self.obs_dim * self.obs_horizon + self.obstacle_encode_dim))
         self.assertEqual(batch["action"].shape, (batch_size, self.pred_horizon, self.action_dim))
 
 

@@ -5,6 +5,8 @@ obs_horizon: 2
 action_horizon: 10
 
 controller:
+    common:
+        sampling_time: 0.1  # sec
     networks:
         obs_dim: 6
         action_dim: 6
@@ -26,6 +28,13 @@ controller:
             beta_schedule: "squaredcos_cap_v2"
             prediction_type: "epsilon"
             use_karras_sigmas: true
+
+cbf_clf_controller:
+    denoising_guidance_step: 20
+    cbf_alpha: 10.0
+    clf_gamma: 0.03
+    penalty_slack_cbf: 1.0e+3
+    penalty_slack_clf: 1.0
 
 trainer:
     use_ema: true

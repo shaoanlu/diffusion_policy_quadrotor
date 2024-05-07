@@ -8,6 +8,8 @@ from diffusers.schedulers.scheduling_dpmsolver_multistep import (
     DPMSolverMultistepScheduler,
 )
 
+from core.controllers.base_controller import BaseController
+from core.controllers.quadrotor_clf_cbf_qp import QuadrotorCLFCBFController
 from core.networks.conditional_unet1d import ConditionalUnet1D
 from utils.normalizers import BaseNormalizer
 
@@ -47,12 +49,13 @@ def build_noise_scheduler_from_config(config: Dict):
         raise NotImplementedError
 
 
-class QuadrotorDiffusionPolicy:
+class QuadrotorDiffusionPolicy(BaseController):
     def __init__(
         self,
         model: ConditionalUnet1D,
         noise_scheduler: DDPMScheduler,
         normalizer: BaseNormalizer,
+        clf_cbf_controller: QuadrotorCLFCBFController,
         config: Dict,
         device: str = "cuda",
     ):
@@ -63,6 +66,9 @@ class QuadrotorDiffusionPolicy:
 
         self.set_config(config)
         self.net.to(self.device)
+
+        self.clf_cbf_controller = clf_cbf_controller
+        self.use_clf_cbf_guidance = False if clf_cbf_controller is None else True
 
     def predict_action(self, obs_dict: Dict[str, List]) -> np.ndarray:
         # stack the observations
@@ -94,6 +100,25 @@ class QuadrotorDiffusionPolicy:
                 # inverse diffusion step (remove noise)
                 naction = self.noise_scheduler.step(model_output=noise_pred, timestep=k, sample=naction).prev_sample
 
+                if self.use_clf_cbf_guidance:
+                    diffusing_action = self.normalizer.unnormalize_data(
+                        naction.detach().to("cpu").numpy().squeeze(), stats=self.norm_stats["act"]
+                    )  # (pred_horizon, 6)
+                    if k < self.clf_cbf_controller.denoising_guidance_step:
+                        refined_action = diffusing_action.copy()
+                        for idx, act in enumerate(diffusing_action):
+                            clf_cbf_obs, pred_control, target_position = self._preprocess_cbf_clf_input(
+                                obs_dict, act, diffusing_action
+                            )
+                            safe_yz_velocity = self.clf_cbf_controller.predict_action(
+                                obs_dict=clf_cbf_obs,
+                                control=pred_control,
+                                target_position=target_position,
+                            )
+                            refined_action[idx, ...] = self._calculate_refined_action_step(act, safe_yz_velocity)
+                        naction = self.normalizer.normalize_data(np.array(refined_action), stats=self.norm_stats["act"])
+                        naction = torch.from_numpy(naction).to(self.device, dtype=torch.float32).unsqueeze(0)
+
         # unnormalize action
         naction = naction.detach().to("cpu").numpy()
         # (1, pred_horizon, action_dim)
@@ -116,6 +141,7 @@ class QuadrotorDiffusionPolicy:
         self.action_horizon = config["action_horizon"]
         self.pred_horizon = config["pred_horizon"]
         self.action_dim = config["controller"]["networks"]["action_dim"]
+        self.sampling_time = config["controller"]["common"]["sampling_time"]
         self.norm_stats = {
             "act": config["normalizer"]["action"],
             "obs": config["normalizer"]["observation"],
@@ -136,3 +162,23 @@ class QuadrotorDiffusionPolicy:
         zr_ddot = (zr_dot - z_dot) / dt
         phir_ddot = (phir_dot - phi_dot) / dt
         return np.array([m_q * (g + zr_ddot), I_xx * phir_ddot])
+
+    def _preprocess_cbf_clf_input(
+        self, obs_dict: Dict[str, List], pred_action: np.ndarray, diffusing_action: np.ndarray
+    ):
+        pred_state = pred_action
+        pred_control = pred_action[[1, 3]]
+        target_position_y, target_position_z = diffusing_action[-1, [0, 2]]  # myoptic planning of CLF
+        target_position = (target_position_y, target_position_z)
+        obstacle_info = {"center": obs_dict["obs_center"], "radius": obs_dict["obs_radius"]}
+        return {"state": pred_state, "obstacle_info": obstacle_info}, pred_control, target_position
+
+    def _calculate_refined_action_step(self, pred_act, safe_yz_velocity):
+        refined_step_action = pred_act.copy()
+        refined_step_action[0] += safe_yz_velocity[0] * self.sampling_time
+        refined_step_action[2] += safe_yz_velocity[1] * self.sampling_time
+        refined_step_action[1] = safe_yz_velocity[0]
+        refined_step_action[3] = safe_yz_velocity[1]
+        refined_step_action[4] = -np.arctan(safe_yz_velocity[0] / safe_yz_velocity[1])
+        # refinedstep_action[5] = (refinedstep_action[4] - pred_act[4]) / self.sampling_time
+        return refined_step_action
