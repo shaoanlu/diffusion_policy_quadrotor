@@ -1,5 +1,5 @@
 # diffusion_policy_quadrotor
-This repository provides a demonstration of imitation learning using a diffusion policy. The implementation is adapted from the official Diffusion Policy [repository](https://github.com/real-stanford/diffusion_policy).
+This repository provides a demonstration of imitation learning using a diffusion policy on quadrotor control. The implementation is adapted from the official Diffusion Policy [repository](https://github.com/real-stanford/diffusion_policy) with an additional feature of using CBf-CLF controller to improve the safety of the generated trajectory.
 
 ## Result
 The control task is to drive the quadrotor from the initial position (0, 0) to the goal position (5, 5) without collision with the obstacles. The animation shows the denoising process of the diffusion policy predicting future trajectory followed by the quadrotor applying the actions. 
