@@ -7,6 +7,7 @@ action_horizon: 10
 controller:
     common:
         sampling_time: 0.1  # sec
+        use_single_step_inference: true
     networks:
         obs_dim: 6
         action_dim: 6
@@ -30,7 +31,7 @@ controller:
             use_karras_sigmas: true
 
 cbf_clf_controller:
-    denoising_guidance_step: 20
+    denoising_guidance_step: 100  # equals num_train_timesteps
     cbf_alpha: 10.0
     clf_gamma: 0.03
     penalty_slack_cbf: 1.0e+3

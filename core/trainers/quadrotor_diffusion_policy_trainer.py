@@ -143,3 +143,44 @@ class PlanarQuadrotorDiffusionPolicyTrainer(BaseDiffusionPolicyTrainer):
         self.action_dim = config["controller"]["networks"]["action_dim"]
         self.pred_horizon = config["pred_horizon"]
         self.obstacle_encode_dim = config["controller"]["networks"]["obstacle_encode_dim"]
+
+
+class PlanarQuadrotorDiffusionPolicyFineTuningTrainer(PlanarQuadrotorDiffusionPolicyTrainer):
+    def __init__(self, net: nn.Module, dataset: PlanarQuadrotorStateDataset, config: Dict, device: str | None = None):
+        super().__init__(net, dataset, config, device)
+
+    def optimization_step(self, action, obs_cond, batch_size):
+        # sample noise to add to actions
+        noise = torch.randn(action.shape, device=self.device)
+
+        # sample a diffusion iteration for each data point
+        timesteps = torch.randint(
+            self.noise_scheduler.config.num_train_timesteps - 1,
+            self.noise_scheduler.config.num_train_timesteps,
+            (batch_size,),
+            device=self.device,
+        ).long()
+
+        # add noise to the clean images according to the noise magnitude at each diffusion iteration
+        # (this is the forward diffusion process)
+        noisy_actions = self.noise_scheduler.add_noise(action, noise, timesteps)
+
+        # predict the noise residual
+        noise_pred = self.net(noisy_actions, timesteps, global_cond=obs_cond)
+
+        # L2 loss
+        loss = nn.functional.mse_loss(noisy_actions - noise_pred, action)
+
+        # optimize
+        loss.backward()
+        self.optimizer.step()
+        self.optimizer.zero_grad()
+        # step lr scheduler every batch
+        # this is different from standard pytorch behavior
+        self.lr_scheduler.step()
+
+        # update Exponential Moving Average of the model weights
+        if self.use_ema:
+            self.ema.step(self.net.parameters())
+
+        return loss

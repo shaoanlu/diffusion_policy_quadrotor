@@ -94,11 +94,17 @@ class QuadrotorDiffusionPolicy(BaseController):
             self.noise_scheduler.set_timesteps(self.noise_scheduler.config.num_train_timesteps)
 
             # denoise
-            for k in self.noise_scheduler.timesteps:
+            denoise_timesteps = (
+                self.noise_scheduler.timesteps[:1] if self.use_single_step_inference else self.noise_scheduler.timesteps
+            )
+            for k in denoise_timesteps:
                 # predict noise
                 noise_pred = self.net(sample=naction, timestep=k, global_cond=obs_cond)
                 # inverse diffusion step (remove noise)
-                naction = self.noise_scheduler.step(model_output=noise_pred, timestep=k, sample=naction).prev_sample
+                if self.use_single_step_inference:
+                    naction = noisy_action - noise_pred
+                else:
+                    naction = self.noise_scheduler.step(model_output=noise_pred, timestep=k, sample=naction).prev_sample
 
                 if self.use_clf_cbf_guidance:
                     diffusing_action = self.normalizer.unnormalize_data(
@@ -147,6 +153,7 @@ class QuadrotorDiffusionPolicy(BaseController):
             "obs": config["normalizer"]["observation"],
         }
         self.quadrotor_params = config["simulator"]
+        self.use_single_step_inference = config.get("controller").get("common").get("use_single_step_inference", False)
 
     def calculate_force_command(self, state: np.ndarray, ref_state: np.ndarray) -> np.ndarray:
         y, y_dot, z, z_dot, phi, phi_dot = state
