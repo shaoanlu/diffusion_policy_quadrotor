@@ -34,7 +34,7 @@ The policy takes 1) the latest N step of observation $o_t$ (position and velocit
 ### Deviation from the original implementation
 - Add a linear layer before the Mish activation to the condition encoder of `ConditionalResidualBlock1D`. This is to prevent the activation from truncating large negative values from the normalized observation.
 - A CLF-CBF-QP controller is implemented and used to modify the noisy actions during the denoising process of the policy. By default, this controller is disabled.
-- A finetuned model for single-step inference, which was trained following paper [Fine-Tuning Image-Conditional Diffusion Models is Easier than You Think](https://arxiv.org/abs/2409.11355), is used by default.
+- A finetuned model for single-step inference is used by default.
 
 <img src="assets/df_clf_cbf_comp.jpg" alt="drawing" width="600"/>
 
@@ -43,6 +43,7 @@ The policy takes 1) the latest N step of observation $o_t$ (position and velocit
 Papers
 - [Diffusion Policy: Visuomotor Policy Learning via Action Diffusion](https://diffusion-policy.cs.columbia.edu/) [arXiv:2303.04137]
 - [3D Diffusion Policy: Generalizable Visuomotor Policy Learning via Simple 3D Representations](https://3d-diffusion-policy.github.io/) [arXiv:2403.03954]
+- [Fine-Tuning Image-Conditional Diffusion Models is Easier than You Think](https://arxiv.org/abs/2409.11355)
 
 Videos and Lectures
 - [DeepLearning.AI: How Diffusion Models Work](https://www.deeplearning.ai/short-courses/how-diffusion-models-work/)
